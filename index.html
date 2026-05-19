@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>R.K. — Aerodynamic Systems Engineering (Preview)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --bg-000:#07080a; --bg-010:#0a0b0e; --bg-020:#0f1115; --bg-030:#14171d; --bg-040:#1a1e26;
+  --line-100:rgba(255,255,255,.06); --line-200:rgba(255,255,255,.10); --line-300:rgba(255,255,255,.16);
+  --line-accent:rgba(139,122,232,.32);
+  --ink-100:#e7e9ee; --ink-200:#a8acb7; --ink-300:#6c7180; --ink-400:#454956;
+  --acc-violet:#8b7ae8; --acc-violet-dim:#5e51a8; --acc-cyan:#5fb8d4; --acc-cyan-dim:#3c7d92;
+  --font-display:'Space Grotesk',system-ui,sans-serif; --font-mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+  --s-1:4px; --s-2:8px; --s-3:12px; --s-4:16px; --s-5:24px; --s-6:32px; --s-7:48px; --s-8:64px; --s-9:96px; --s-10:128px;
+  --ease-out:cubic-bezier(0.16,1,0.3,1); --dur-med:320ms; --dur-slow:600ms;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg-010);color:var(--ink-100);font-family:var(--font-display);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden;min-height:100vh;
+  background-image:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(139,122,232,.06),transparent 60%),radial-gradient(ellipse 60% 40% at 90% 100%,rgba(95,184,212,.04),transparent 60%);
+  background-attachment:fixed}
+::selection{background:rgba(139,122,232,.35)}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg-010)}::-webkit-scrollbar-thumb{background:var(--line-200)}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+a{color:inherit;text-decoration:none}
+.mono{font-family:var(--font-mono);font-feature-settings:'tnum' 1,'zero' 1}
+.label{font-family:var(--font-mono);font-size:11px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-300)}
+.container{width:100%;max-width:1280px;margin:0 auto;padding:0 var(--s-5)}
+@media(min-width:768px){.container{padding:0 var(--s-7)}}
+.section{position:relative;padding-block:var(--s-10) var(--s-9)}
+@media(max-width:768px){.section{padding-block:var(--s-9) var(--s-8)}}
+.fx-canvas{position:fixed;inset:0;z-index:0;pointer-events:none}.fx-canvas canvas{display:block;width:100%!important;height:100%!important}
+.fx-grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.035;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.6 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>")}
+main{position:relative;z-index:2}
+.idx-tag{display:inline-flex;align-items:center;gap:var(--s-2);font-family:var(--font-mono);font-size:11px;letter-spacing:.15em;color:var(--ink-300)}
+.idx-tag::before{content:'';width:6px;height:6px;background:var(--acc-violet);box-shadow:0 0 8px rgba(139,122,232,.6)}
+@keyframes pulse-node{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.85)}}
+.pulse-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--acc-cyan);box-shadow:0 0 6px var(--acc-cyan);animation:pulse-node 2.4s var(--ease-out) infinite}
+.pulse-dot.violet{background:var(--acc-violet);box-shadow:0 0 6px var(--acc-violet)}
+.reveal{opacity:0;transform:translateY(16px);transition:opacity var(--dur-slow) var(--ease-out),transform var(--dur-slow) var(--ease-out)}
+.reveal.in{opacity:1;transform:translateY(0)}
+ 
+/* Status bar */
+.status-bar{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(7,8,10,.65);backdrop-filter:blur(12px) saturate(120%);-webkit-backdrop-filter:blur(12px) saturate(120%)}
+.status-bar__inner{max-width:1440px;margin:0 auto;padding:10px var(--s-5);display:flex;align-items:center;justify-content:space-between;gap:var(--s-4);font-family:var(--font-mono);font-size:11px;letter-spacing:.12em}
+.sb-rule{height:1px;background:linear-gradient(90deg,transparent,var(--line-200) 15%,var(--line-200) 85%,transparent)}
+.sb-group{display:flex;align-items:center;gap:var(--s-3);color:var(--ink-200)}
+.sb-group--right{color:var(--ink-300)}
+.sb-callsign{font-weight:600;color:var(--ink-100);letter-spacing:.22em}
+.sb-meta,.sb-sep{color:var(--ink-400)}
+.sb-nav{display:none;gap:var(--s-5)}
+.sb-link{color:var(--ink-300);transition:color 180ms var(--ease-out);position:relative;padding-block:4px}
+.sb-link:hover{color:var(--ink-100)}
+.sb-link::before{content:'';position:absolute;left:0;bottom:-2px;width:0;height:1px;background:var(--acc-violet);transition:width var(--dur-med) var(--ease-out)}
+.sb-link:hover::before{width:100%}
+@media(min-width:880px){.sb-nav{display:flex}.status-bar__inner{padding:12px var(--s-7)}}
+@media(max-width:600px){.sb-meta,.sb-sep,.sb-status{display:none}}
+ 
+/* Hero */
+.hero{min-height:100vh;display:flex;align-items:center;padding-top:clamp(120px,18vh,180px);padding-bottom:var(--s-9)}
+.hero .container{display:grid;grid-template-columns:1fr;gap:var(--s-8);align-items:start}
+@media(min-width:1024px){.hero .container{grid-template-columns:minmax(0,1.8fr) minmax(280px,1fr);gap:var(--s-9);align-items:end}}
+.hero__grid{display:flex;flex-direction:column;gap:var(--s-5)}
+.hero__meta{display:flex;align-items:center;justify-content:space-between;gap:var(--s-4);flex-wrap:wrap;color:var(--ink-300)}
+.hero__coords{display:flex;gap:var(--s-4);font-size:11px;letter-spacing:.15em;color:var(--ink-400)}
+.hero__title{font-family:var(--font-display);font-weight:400;font-size:clamp(2.2rem,6.4vw,5rem);line-height:1.04;letter-spacing:-.025em;color:var(--ink-100);max-width:22ch;margin-top:var(--s-2)}
+.hero__title em{font-style:italic;font-weight:300;color:var(--ink-200)}
+.hero__title-accent{font-weight:600;background:linear-gradient(180deg,var(--ink-100) 70%,var(--acc-violet) 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.hero__lede{font-size:clamp(.95rem,1.4vw,1.06rem);line-height:1.65;color:var(--ink-200);max-width:60ch;margin-top:var(--s-3)}
+.hero__discipline-row{display:flex;align-items:center;flex-wrap:wrap;gap:var(--s-3);margin-top:var(--s-5);padding-top:var(--s-5);border-top:1px solid var(--line-100)}
+.discipline{display:inline-flex;align-items:baseline;gap:var(--s-2)}
+.discipline__code{font-family:var(--font-mono);font-size:10px;letter-spacing:.2em;color:var(--acc-violet);padding:3px 6px;border:1px solid var(--line-accent);background:rgba(139,122,232,.06)}
+.discipline__label{font-size:13px;color:var(--ink-200)}
+.hero__discipline-sep{display:inline-block;width:24px;height:1px;background:var(--line-200)}
+.hero__cta{margin-top:var(--s-7);display:inline-flex;align-items:center;gap:var(--s-3);padding:14px 22px;font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;color:var(--ink-100);border:1px solid var(--line-300);background:rgba(255,255,255,.02);transition:all var(--dur-med) var(--ease-out);width:fit-content;position:relative;overflow:hidden}
+.hero__cta::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(139,122,232,.18),transparent);transform:translateX(-110%);transition:transform var(--dur-slow) var(--ease-out)}
+.hero__cta:hover{border-color:var(--acc-violet)}.hero__cta:hover::before{transform:translateX(110%)}
+.hero__cta svg{transition:transform var(--dur-med) var(--ease-out)}.hero__cta:hover svg{transform:translateY(3px)}
+.hero__telemetry{border:1px solid var(--line-200);background:rgba(15,17,21,.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:var(--s-4) var(--s-5);display:flex;flex-direction:column;gap:var(--s-3);position:relative}
+.hero__telemetry::before{content:'';position:absolute;top:-1px;left:-1px;width:14px;height:14px;border-top:1px solid var(--acc-violet);border-left:1px solid var(--acc-violet)}
+.hero__telemetry::after{content:'';position:absolute;bottom:-1px;right:-1px;width:14px;height:14px;border-bottom:1px solid var(--acc-cyan);border-right:1px solid var(--acc-cyan)}
+.tel-row{display:flex;flex-direction:column;gap:2px;padding-block:var(--s-2);border-bottom:1px solid var(--line-100)}.tel-row:last-child{border-bottom:none}
+.tel-k{font-family:var(--font-mono);font-size:10px;letter-spacing:.18em;color:var(--ink-400);text-transform:uppercase}
+.tel-v{font-family:var(--font-mono);font-size:12px;color:var(--ink-200);line-height:1.5}
+@media(max-width:600px){.hero__coords{display:none}}
+ 
+/* Systems */
+.systems{position:relative}
+.systems::before{content:'';position:absolute;top:0;left:var(--s-5);right:var(--s-5);height:1px;background:linear-gradient(90deg,transparent,var(--line-200) 30%,var(--line-200) 70%,transparent)}
+.systems__header{max-width:760px;display:flex;flex-direction:column;gap:var(--s-3);margin-bottom:var(--s-7)}
+.systems__title,.projects__title{font-family:var(--font-display);font-size:clamp(1.7rem,3.4vw,2.5rem);font-weight:400;letter-spacing:-.02em;line-height:1.12;color:var(--ink-100);margin-top:var(--s-2)}
+.systems__desc,.projects__desc{font-size:.98rem;color:var(--ink-200);line-height:1.65;max-width:60ch}
+.systems__pipeline{display:flex;align-items:center;flex-wrap:wrap;gap:var(--s-3);padding:var(--s-4);margin-bottom:var(--s-7);border-top:1px solid var(--line-100);border-bottom:1px solid var(--line-100);background:rgba(15,17,21,.4)}
+.pipe-step{display:inline-flex;align-items:center;gap:var(--s-2);padding:6px 10px;border:1px solid var(--line-200);background:var(--bg-020)}
+.pipe-step__n{font-family:var(--font-mono);font-size:10px;color:var(--ink-400);letter-spacing:.12em}
+.pipe-step__label{font-family:var(--font-mono);font-size:11px;color:var(--ink-200);letter-spacing:.18em;text-transform:uppercase}
+.pipe-step--active{border-color:var(--acc-violet);background:rgba(139,122,232,.08)}
+.pipe-step--active .pipe-step__label,.pipe-step--active .pipe-step__n{color:var(--acc-violet)}
+.pipe-edge{flex:1 0 18px;height:1px;background:linear-gradient(90deg,var(--line-300),var(--line-100));min-width:12px}
+.systems__grid{display:grid;grid-template-columns:1fr;gap:var(--s-4)}
+@media(min-width:720px){.systems__grid{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:1100px){.systems__grid{grid-template-columns:repeat(3,1fr)}}
+.sys-panel{position:relative;display:flex;flex-direction:column;gap:var(--s-4);padding:var(--s-5);background:rgba(15,17,21,.7);border:1px solid var(--line-200);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);transition:border-color var(--dur-med) var(--ease-out)}
+.sys-panel::before,.sys-panel::after{content:'';position:absolute;width:12px;height:12px;opacity:.7;transition:opacity var(--dur-med) var(--ease-out)}
+.sys-panel::before{top:-1px;left:-1px;border-top:1px solid var(--acc-violet);border-left:1px solid var(--acc-violet)}
+.sys-panel::after{bottom:-1px;right:-1px;border-bottom:1px solid var(--acc-cyan);border-right:1px solid var(--acc-cyan)}
+.sys-panel:hover{border-color:var(--line-300)}.sys-panel:hover::before,.sys-panel:hover::after{opacity:1}
+.sys-panel__head{display:flex;justify-content:space-between;align-items:center;padding-bottom:var(--s-3);border-bottom:1px solid var(--line-100)}
+.sys-panel__id{display:inline-flex;align-items:center;gap:var(--s-2)}
+.sys-panel__sysid{font-family:var(--font-mono);font-size:11px;color:var(--ink-300);letter-spacing:.18em}
+.sys-panel__code{font-family:var(--font-mono);font-size:10px;letter-spacing:.22em;color:var(--acc-violet);padding:3px 7px;border:1px solid var(--line-accent);background:rgba(139,122,232,.06)}
+.sys-panel__name{font-family:var(--font-display);font-size:1.15rem;font-weight:500;letter-spacing:-.01em;color:var(--ink-100);line-height:1.25}
+.sys-panel__summary{font-size:.92rem;color:var(--ink-200);line-height:1.6}
+.sys-panel__section{display:flex;flex-direction:column;gap:var(--s-2)}
+.sys-panel__methods{list-style:none;display:flex;flex-direction:column;gap:var(--s-2)}
+.sys-panel__methods li{display:flex;align-items:baseline;gap:var(--s-3);font-size:.88rem;color:var(--ink-200);line-height:1.5}
+.sys-panel__tick{flex-shrink:0;width:6px;height:1px;background:var(--acc-violet);margin-top:9px}
+.sys-panel__enables{font-size:.9rem;color:var(--ink-100);line-height:1.55;padding:var(--s-3);background:rgba(95,184,212,.04);border-left:2px solid var(--acc-cyan-dim)}
+.sys-panel__metrics{margin-top:auto;display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line-100);padding-top:1px}
+.sys-metric{background:var(--bg-020);padding:var(--s-2) var(--s-3);display:flex;flex-direction:column;gap:2px}
+.sys-metric__k{font-family:var(--font-mono);font-size:9px;letter-spacing:.2em;color:var(--ink-400);text-transform:uppercase}
+.sys-metric__v{font-family:var(--font-mono);font-size:12px;color:var(--ink-100)}
+ 
+/* Projects */
+.projects{padding-bottom:var(--s-10)}
+.projects__header{max-width:760px;display:flex;flex-direction:column;gap:var(--s-3);margin-bottom:var(--s-7)}
+.projects__list{list-style:none;display:flex;flex-direction:column;gap:var(--s-3);border-top:1px solid var(--line-200)}
+.prj-card{border-bottom:1px solid var(--line-200);background:rgba(15,17,21,.5);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);transition:background var(--dur-med) var(--ease-out);position:relative}
+.prj-card:hover{background:rgba(20,23,29,.7)}
+.prj-card.is-open{background:rgba(20,23,29,.75)}
+.prj-card--featured{border-left:2px solid var(--acc-violet);background:rgba(20,23,29,.7)}
+.prj-card--featured::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:linear-gradient(180deg,var(--acc-violet) 0%,var(--acc-cyan) 100%);opacity:.5}
+.prj-card__summary{display:grid;grid-template-columns:auto 1fr auto auto;gap:var(--s-5);align-items:center;padding:var(--s-5);width:100%;text-align:left;cursor:pointer}
+@media(max-width:720px){.prj-card__summary{grid-template-columns:auto 1fr auto;grid-template-rows:auto auto;gap:var(--s-3) var(--s-4);padding:var(--s-4)}}
+.prj-card__col-id{display:flex;flex-direction:column;gap:var(--s-2);min-width:60px}
+.prj-card__num{font-family:var(--font-mono);font-size:11px;letter-spacing:.18em;color:var(--ink-300)}
+.prj-card__code{font-family:var(--font-mono);font-size:10px;letter-spacing:.2em;color:var(--acc-violet);padding:2px 6px;border:1px solid var(--line-accent);background:rgba(139,122,232,.06);width:fit-content}
+.prj-card__featured-tag{font-family:var(--font-mono);font-size:9px;letter-spacing:.22em;color:var(--acc-cyan);padding:2px 6px;border:1px solid var(--acc-cyan-dim);background:rgba(95,184,212,.06);width:fit-content}
+.prj-card__col-main{display:flex;flex-direction:column;gap:2px}
+.prj-card__title{font-family:var(--font-display);font-size:clamp(1.05rem,1.6vw,1.25rem);font-weight:500;letter-spacing:-.01em;color:var(--ink-100);line-height:1.25}
+.prj-card__subtitle{font-size:.85rem;color:var(--ink-300);line-height:1.4}
+.prj-card__col-meta{display:flex;align-items:center;gap:var(--s-3);flex-wrap:wrap}
+@media(max-width:720px){.prj-card__col-meta{grid-column:1/-1;padding-top:var(--s-2);border-top:1px solid var(--line-100)}}
+.prj-card__meta-item{font-family:var(--font-mono);font-size:10px;letter-spacing:.16em;color:var(--ink-300);text-transform:uppercase}
+.prj-card__meta-sep{width:8px;height:1px;background:var(--line-300)}
+.prj-card__status{color:var(--acc-cyan)}
+.prj-card__col-toggle{width:32px;height:32px;display:grid;place-items:center;border:1px solid var(--line-200);color:var(--ink-200);transition:all var(--dur-med) var(--ease-out)}
+.prj-card__summary:hover .prj-card__col-toggle{border-color:var(--acc-violet);color:var(--acc-violet)}
+.prj-card.is-open .prj-card__col-toggle{border-color:var(--acc-violet);color:var(--acc-violet);background:rgba(139,122,232,.08)}
+.prj-card__detail{overflow:hidden;border-top:1px solid var(--line-100);animation:expand .36s var(--ease-out)}
+@keyframes expand{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.prj-card__detail-inner{display:grid;grid-template-columns:1fr;gap:var(--s-5);padding:var(--s-6) var(--s-5)}
+@media(min-width:900px){.prj-card__detail-inner{grid-template-columns:1fr 1fr;column-gap:var(--s-7);row-gap:var(--s-6);padding:var(--s-7)}.detail-block--accent,.prj-card__tags{grid-column:1/-1}}
+.detail-block{display:flex;flex-direction:column;gap:var(--s-3)}
+.detail-block__label-row{display:flex;align-items:center;gap:var(--s-3)}
+.detail-block__rule{flex:1;height:1px;background:linear-gradient(90deg,var(--line-200),transparent 80%)}
+.detail-block__body{font-size:.94rem;color:var(--ink-200);line-height:1.7}
+.detail-block--accent .detail-block__body{color:var(--ink-100);padding:var(--s-4);background:rgba(139,122,232,.05);border-left:2px solid var(--acc-violet);font-size:.95rem}
+.detail-block__list{list-style:none;display:flex;flex-direction:column;gap:var(--s-3)}
+.detail-block__list li{display:flex;gap:var(--s-3);font-size:.9rem;color:var(--ink-200);line-height:1.6}
+.detail-block__index{flex-shrink:0;font-family:var(--font-mono);font-size:10px;color:var(--acc-violet);letter-spacing:.15em;padding-top:4px;min-width:22px}
+.prj-card__tags{display:flex;flex-wrap:wrap;gap:var(--s-2);padding-top:var(--s-4);border-top:1px solid var(--line-100)}
+.prj-tag{font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;color:var(--ink-300);padding:4px 9px;border:1px solid var(--line-200);background:var(--bg-020);text-transform:uppercase}
+ 
+/* Footer */
+.footer{position:relative;z-index:2;padding-block:var(--s-8);border-top:1px solid var(--line-200);background:rgba(7,8,10,.6)}
+.footer__top{display:grid;grid-template-columns:1fr;gap:var(--s-6);padding-bottom:var(--s-6);border-bottom:1px solid var(--line-100)}
+@media(min-width:800px){.footer__top{grid-template-columns:2fr 1fr;gap:var(--s-8)}}
+.footer__col{display:flex;flex-direction:column;gap:var(--s-3)}
+.footer__statement{font-family:var(--font-display);font-style:italic;font-weight:300;font-size:clamp(1.05rem,1.6vw,1.3rem);color:var(--ink-200);line-height:1.5;max-width:38ch;margin-top:var(--s-2)}
+.footer__meta-row{display:flex;justify-content:space-between;gap:var(--s-3);padding-block:var(--s-2);border-bottom:1px solid var(--line-100);font-family:var(--font-mono);font-size:11px;letter-spacing:.12em}
+.footer__meta-row:last-child{border-bottom:none}
+.footer__k{color:var(--ink-400);text-transform:uppercase}
+.footer__v{color:var(--ink-200);text-align:right}
+.footer__bottom{padding-top:var(--s-5);display:flex;justify-content:space-between;align-items:center;font-family:var(--font-mono);font-size:10px;letter-spacing:.18em;color:var(--ink-400)}
+</style>
+</head>
+<body>
+ 
+<div class="fx-canvas" id="fx-canvas" aria-hidden="true"></div>
+<div class="fx-grain" aria-hidden="true"></div>
+ 
+<header class="status-bar" role="banner">
+  <div class="status-bar__inner">
+    <div class="sb-group">
+      <span class="sb-callsign">AERODYNE / R.K.</span>
+      <span class="sb-sep">·</span>
+      <span class="sb-meta mono">REV 02.6</span>
+    </div>
+    <nav class="sb-nav" aria-label="Section navigation">
+      <a href="#hero" class="sb-link mono">00 / IDENTITY</a>
+      <a href="#systems" class="sb-link mono">01 / SYSTEMS</a>
+      <a href="#projects" class="sb-link mono">02 / PROJECTS</a>
+    </nav>
+    <div class="sb-group sb-group--right">
+      <span class="pulse-dot violet"></span>
+      <span class="sb-status mono">FIELD · ACTIVE</span>
+    </div>
+  </div>
+  <div class="sb-rule"></div>
+</header>
+ 
+<main>
+ 
+<!-- HERO -->
+<section id="hero" class="hero section">
+  <div class="container">
+    <div class="hero__grid">
+      <div class="hero__meta reveal">
+        <span class="idx-tag mono">00 / IDENTITY</span>
+        <div class="hero__coords mono"><span>LAT 51.5074°N</span><span>LON 00.1278°W</span></div>
+      </div>
+      <h1 class="hero__title reveal" style="transition-delay:60ms">
+        Engineering <em>aerodynamic systems</em><br>for <span class="hero__title-accent">performance optimisation</span>.
+      </h1>
+      <p class="hero__lede reveal" style="transition-delay:140ms">
+        Pre-university engineering student. Works across fluid-dynamics analysis, parametric CAD, and in-house experimental validation as a single coupled method. Every design decision is traceable to a simulated or measured outcome.
+      </p>
+      <div class="hero__discipline-row reveal" style="transition-delay:220ms">
+        <span class="discipline"><span class="discipline__code mono">FLD</span><span class="discipline__label">Fluid Dynamics</span></span>
+        <span class="hero__discipline-sep"></span>
+        <span class="discipline"><span class="discipline__code mono">CAD</span><span class="discipline__label">Engineering Design</span></span>
+        <span class="hero__discipline-sep"></span>
+        <span class="discipline"><span class="discipline__code mono">EXP</span><span class="discipline__label">Experimental Research</span></span>
+      </div>
+      <a href="#systems" class="hero__cta reveal mono" style="transition-delay:320ms">
+        <span>View systems</span>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1.5V12.5M7 12.5L2.5 8M7 12.5L11.5 8" stroke="currentColor" stroke-width="1.2" stroke-linecap="square"/></svg>
+      </a>
+    </div>
+    <aside class="hero__telemetry reveal" style="transition-delay:180ms">
+      <div class="tel-row"><span class="tel-k mono">methodology</span><span class="tel-v mono">analyse → model → build → test → optimise</span></div>
+      <div class="tel-row"><span class="tel-k mono">recognition</span><span class="tel-v mono">Arkwright Scholar · F1iS National 3rd</span></div>
+      <div class="tel-row"><span class="tel-k mono">focus</span><span class="tel-v mono">adaptive aerodynamics · validation systems</span></div>
+      <div class="tel-row"><span class="tel-k mono">trajectory</span><span class="tel-v mono">aerospace systems engineering</span></div>
+    </aside>
+  </div>
+</section>
+ 
+<!-- SYSTEMS -->
+<section id="systems" class="systems section">
+  <div class="container">
+    <div class="systems__header reveal">
+      <span class="idx-tag mono">01 / SYSTEMS</span>
+      <h2 class="systems__title">Engineering systems — dashboard</h2>
+      <p class="systems__desc">Three coupled layers compose the working method. The fluid-dynamics layer drives decisions; the CAD layer executes them as manufacturable geometry; the experimental layer validates the result and feeds correction back upstream. Every project below traverses these three layers in order.</p>
+    </div>
+    <div class="systems__pipeline reveal">
+      <div class="pipe-step"><span class="pipe-step__n mono">01</span><span class="pipe-step__label mono">Analyse</span></div>
+      <span class="pipe-edge"></span>
+      <div class="pipe-step"><span class="pipe-step__n mono">02</span><span class="pipe-step__label mono">Model</span></div>
+      <span class="pipe-edge"></span>
+      <div class="pipe-step"><span class="pipe-step__n mono">03</span><span class="pipe-step__label mono">Build</span></div>
+      <span class="pipe-edge"></span>
+      <div class="pipe-step"><span class="pipe-step__n mono">04</span><span class="pipe-step__label mono">Test</span></div>
+      <span class="pipe-edge"></span>
+      <div class="pipe-step pipe-step--active"><span class="pipe-step__n mono">05</span><span class="pipe-step__label mono">Optimise</span></div>
+    </div>
+    <div class="systems__grid" id="sys-grid"></div>
+  </div>
+</section>
+ 
+<!-- PROJECTS -->
+<section id="projects" class="projects section">
+  <div class="container">
+    <header class="projects__header reveal">
+      <span class="idx-tag mono">02 / PROJECTS</span>
+      <h2 class="projects__title">Case studies — engineering record</h2>
+      <p class="projects__desc">Five entries: a competition project, a national-scholarship defence, an independent research paper, an in-house instrumentation build, and the active capstone. Each entry follows a fixed structure — problem, methodology, contribution, optimisation, result — so authorship and decision traceability are visible without reading between the lines.</p>
+    </header>
+    <ul class="projects__list" id="prj-list"></ul>
+  </div>
+</section>
+ 
+</main>
+ 
+<footer class="footer">
+  <div class="container">
+    <div class="footer__top">
+      <div class="footer__col">
+        <span class="idx-tag mono">END · TRANSMISSION</span>
+        <p class="footer__statement">Geometry is the easy part. The hard part is knowing which question to ask the geometry.</p>
+      </div>
+      <div class="footer__col">
+        <div class="footer__meta-row"><span class="mono footer__k">Contact</span><span class="mono footer__v">available on request</span></div>
+        <div class="footer__meta-row"><span class="mono footer__k">Posture</span><span class="mono footer__v">student · researcher · builder</span></div>
+        <div class="footer__meta-row"><span class="mono footer__k">Trajectory</span><span class="mono footer__v">aerospace systems engineering</span></div>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <span class="mono">© R.K. — Aerodyne</span>
+      <span class="mono">build 2026.05 · static</span>
+    </div>
+  </div>
+</footer>
+ 
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.166.1/build/three.module.js';
+ 
+// ─── DATA ───
+const systems = [
+  { id:'SYS-01', code:'FLD', name:'Fluid Dynamics — analytical layer',
+    summary:'Primary decision-making system. Resolves the flow field around a geometry before metal is cut — identifying separation onset, wake structure, and pressure distribution so that design choices are made against simulated evidence, not intuition. All downstream geometry and test plans are anchored here.',
+    methods:['RANS CFD with k-ω SST closure (OpenFOAM, simpleFoam)','Boundary-layer resolution and separation-point tracking','Surface Cp mapping; drag / lift decomposition by component','Wake-width and turbulence-intensity readout for follow-on test design'],
+    enables:'Geometry decisions made against pressure and velocity fields — not assumption. Each design variable is ranked by its contribution to the measured aerodynamic quantity it targets.',
+    metrics:[{k:'Reynolds range',v:'10⁴ – 10⁶'},{k:'Solver class',v:'RANS / LES'}] },
+  { id:'SYS-02', code:'CAD', name:'CAD — execution layer',
+    summary:'Translates analytical decisions into manufacturable geometry. Parametric so that any variable flagged by the fluid-dynamics layer — fillet radius, taper angle, camber distribution — can be re-swept and re-simulated without rebuilding from scratch.',
+    methods:['Parametric solid modelling (Fusion 360, SolidWorks)','G2 / G3 surface continuity on aero-critical faces','Design-for-manufacture constraints driven by available process (CNC, FDM, hand-finish)','Variable tables coupled to simulation inputs — closed iteration loop'],
+    enables:'Geometry that survives a constraint change. New simulation result or fabrication limit propagates through the model in minutes, not days.',
+    metrics:[{k:'Iteration cycle',v:'< 30 min'},{k:'Param coupling',v:'full chain'}] },
+  { id:'SYS-03', code:'EXP', name:'Experimental — validation layer',
+    summary:'The truth check. Physical measurement that either confirms the analytical prediction or quantifies the deviation — and feeds that deviation back as a correction factor on the next CFD cycle. No design is considered closed until simulation and measurement agree within a stated tolerance.',
+    methods:['Open-circuit wind tunnel — in-house build, characterised against pitot reference','Pitot rake and pressure-tap arrays for velocity and Cp profiles','Flow visualisation (tuft, smoke) for separation and reattachment','Sim-vs-test deviation analysis with stated uncertainty bounds'],
+    enables:'Confidence that simulated gains survive contact with real flow — and, when they do not, a calibration path that improves the next CFD run rather than discarding it.',
+    metrics:[{k:'Test velocity',v:'0 – 25 m/s'},{k:'Sample rate',v:'≤ 1 kHz'}] },
+];
+ 
+const projects = [
+  { id:'PRJ-01', code:'F1S', title:'F1 in Schools', subtitle:'3rd Place — National Finals', domain:'Aerodynamic Optimisation', year:'2024', status:'Completed',
+    problem:'Design a CO₂-propelled scale car for minimum drag under a fixed body-volume envelope and fixed-mass tolerance, against a national field of regional-champion teams operating with significantly larger fabrication budgets.',
+    methodology:['Baseline body modelled in Fusion 360 with three parametric drivers: body width, nose radius, rear taper angle.','CFD sweep of baseline plus four candidate shells in OpenFOAM (simpleFoam, k-ω SST) at race-condition velocity.','Surface Cp mapping to locate separation on the rear deck and inboard wheel fairings.','Iterative geometry refinement targeting attached flow across the rear 80% of body length.','Final candidate machined and run on the regulation track for time-of-flight validation against CFD prediction.'],
+    contribution:['Owned the CFD pipeline end to end — mesh, boundary conditions, post-processing — and cross-checked results against a coarser second mesh to bound numerical error.','Identified the wheel-fairing fillet radius as the dominant drag driver after the first sweep; redirected subsequent iterations onto that variable rather than splitting effort across the full parameter set.','Rejected an aggressive low-drag nose profile because Cp data showed early stagnation movement and unstable attachment at off-axis yaw — chose a slightly higher-drag nose with stable attachment instead.','Tuned nose taper against wake width, not Cd in isolation, so the car held trailing-position pace as well as straight-line speed.'],
+    optimisation:'Drag was prioritised over downforce because the brief rewards top-end velocity, not cornering grip. The wheel-fairing fillet radius alone accounted for ~38% of the Cd delta seen across iterations — every subsequent design hour was spent there, not on lower-leverage variables. Nose taper was tuned to a wake-width target rather than to minimum Cd, accepting a small Cd penalty for measurably more stable trailing-car behaviour.',
+    result:'3rd place at National Finals against 30+ regional-champion teams. Final race pace within 1.4% of the winning car despite sub-quartile fabrication budget. Measured time-of-flight tracked CFD prediction to within 3%.',
+    tags:['CFD','OpenFOAM','Fusion 360','Iterative design'] },
+  { id:'PRJ-02', code:'ARK', title:'Arkwright Engineering Scholarship', subtitle:'Selective National Recognition', domain:'Engineering Aptitude', year:'2023', status:'Awarded',
+    problem:'Two-stage selection — timed aptitude examination plus a panel interview defending an original engineering proposal — assessing analytical reasoning, design judgement, and the ability to hold a position under technical scrutiny.',
+    methodology:['Proposal: a low-cost airflow visualisation rig for school-level aerodynamics teaching.','Comparative analysis of three visualisation methods — smoke, tuft, laser sheet — scored against cost, repeatability, and safety for unsupervised student use.','Defended the position that measurement uncertainty is the more useful quantity to teach at learner stage, not measurement precision.'],
+    contribution:['Authored the proposal from scratch — chose teaching-instrument framing over research-instrument framing, which reframed the panel’s evaluation criteria entirely.','Pre-built the cost-benefit comparison matrix so trade-offs could be defended numerically rather than argued from intuition.','Rejected laser-sheet visualisation despite higher fidelity — safety constraints and operator training requirements made it unviable for the stated end-user.','Identified ahead of the interview that the load-bearing argument was the framing of trade-offs, not the rig itself; prepared accordingly.'],
+    optimisation:'The rig was pitched as teaching-first, research-second — accepting reduced fidelity to gain unsupervised student operability. This single framing choice converted a moderate proposal into a defensible one: the panel evaluated against pedagogical fit, where the lower-cost design wins, rather than against measurement fidelity, where it would have lost.',
+    result:'Scholarship awarded. Sustained engineering mentorship, technical sponsorship, and entry into the national engineering pipeline.',
+    tags:['Interview defence','Design rationale','Engineering reasoning'] },
+  { id:'PRJ-03', code:'BIO', title:'Ionic Wind × Shark Skin Biomimicry', subtitle:'Research Paper — Bio-inspired Fluid Dynamics', domain:'Independent Research', year:'2024', status:'Published — internal',
+    problem:'Electrohydrodynamic (EHD) thrusters suffer from low thrust-to-area ratios and unstable corona discharge at upper voltage. Open question: does denticle-aligned surface microstructure — analogous to shark-skin riblets — suppress turbulent breakdown in the post-corona region and raise effective thrust per unit electrode area?',
+    methodology:['Literature synthesis across EHD propulsion (Christenson & Moller; MIT EAD aircraft, Barrett et al.) and riblet drag reduction (Bechert et al., Walsh).','Working hypothesis: riblets aligned with ion drift suppress lateral turbulent fluctuation in the ion-laden boundary layer, stabilising thrust.','Benchtop test cell built with swappable electrode plates — smooth aluminium control vs. 3D-printed denticle array with riblet pitch as primary variable.','Measurement chain: micro-balance for thrust, series ammeter for current draw, high-speed imaging for corona stability across an applied-voltage sweep.'],
+    contribution:['Designed and built the test cell — electrode mount, alignment jig, micro-balance integration — from scratch.','Made the central methodological decision to normalise riblet pitch against estimated ion mean free path rather than against biological denticle scale. This reframed the project from biomimicry-by-analogy to length-scale matching.','Iterated electrode-gap geometry three times after early runs showed corona instability dominating the thrust signal; locked geometry once corona stability was repeatable across runs.','Rejected an early plan to vary riblet height as a second axis — single-variable sweep gave cleaner causation and the rig’s measurement uncertainty would have masked the second-order effect anyway.'],
+    optimisation:'Riblet pitch was treated as the single primary variable, normalised against ion mean free path rather than copied from biological scale. That reframing — from "copy nature" to "match the relevant physical length scale" — is the methodological core of the paper: it explains why direct biomimicry was failing in earlier amateur literature and predicts a different optimal pitch.',
+    result:'Measurable improvement in thrust stability at the upper end of the voltage sweep, where the smooth-plate control became unstable. Paper documents the rig, the deviation between predicted and measured scaling, and a refined experiment plan for a follow-on study with tighter pitch resolution.',
+    tags:['EHD propulsion','Biomimicry','Experimental rig','Literature synthesis'] },
+  { id:'PRJ-04', code:'WT', title:'Wind Tunnel Development', subtitle:'In-House Validation Instrument', domain:'Instrumentation Design', year:'2024 – 2025', status:'In development',
+    problem:'No accessible school-grade subsonic wind tunnel available for validating CFD work produced by the other projects. Commercial units are cost-prohibitive; existing DIY designs typically run at turbulence intensities (5–8%) too high to discriminate between competing aerodynamic geometries.',
+    methodology:['Open-circuit Eiffel-type configuration selected over closed-circuit for footprint, cost, and ease of test-section access.','Contraction ratio set at 6:1 — chosen from the turbulence-intensity-vs-contraction-length trade curves in Mehta & Bradshaw (1979).','Conditioning train: hexagonal-cell honeycomb followed by three graded mesh screens, targeting < 1% turbulence intensity at test-section inlet.','Instrumentation: pitot rake at test-section inlet for velocity profile, surface pressure taps for Cp distribution on mounted models.','Plenum chamber and contraction surfaces built with internal hand-finishing to suppress surface-roughness-induced transition.'],
+    contribution:['Specified the entire instrument against a measurement-quality target (< 1% TI) rather than a velocity target — the more useful specification for CFD validation, but the harder one to hit.','Designed the contraction profile in CAD using a matched-cubic curve to keep favourable pressure gradient through the contraction and prevent boundary-layer growth on the walls.','Rejected a stepped honeycomb-only conditioning section in favour of honeycomb-plus-screens; honeycomb alone removes swirl but leaves small-scale turbulence intact.','Built the frame and contraction; screens, pitot rake, and DAQ chain are the current work front.'],
+    optimisation:'The design is driven by measurement quality, not peak velocity. A slower, cleaner flow is more useful for resolving small aerodynamic differences than a fast, noisy one. The contraction was the longest-considered decision in the build — its geometry sets the ceiling on every measurement the tunnel will ever take, and a poor contraction cannot be recovered downstream.',
+    result:'Frame and contraction complete. Honeycomb fitted; screens, instrumentation, and DAQ in active build. Target operating envelope: models up to 200 mm chord at 0–25 m/s, with characterised TI to be reported alongside first test runs.',
+    tags:['Wind tunnel','Instrumentation','Turbulence management','Open-circuit'] },
+  { id:'PRJ-05', code:'MW', title:'Morphing Wing RC Aircraft', subtitle:'Capstone — Adaptive Aerodynamics', domain:'Adaptive Systems', year:'2025 – 2026', status:'Concept → Prototype', featured:true,
+    problem:'A fixed-geometry wing is always a compromise: a profile optimised for cruise carries an efficiency penalty in climb and approach. The capstone tests whether a small RC platform can carry a compliant, span-wise morphing wing whose camber adapts in flight, and whether the actuation overhead — mass, power, response delay — is recovered through aerodynamic gain across a representative mission profile.',
+    methodology:['Wing structure: corrugated internal skeleton with elastomeric skin — bending compliance in the camber axis, stiffness in span — driven by a single servo per span station, replacing discrete control surfaces.','XFOIL polar sweep across a target camber range to define the morphing envelope at the mission Reynolds number.','CFD on transitional geometries — intermediate camber states — not only on the endpoint shapes, because the penalty during the morph itself is the failure mode that gets overlooked.','Sub-scale section testing in the in-house wind tunnel before committing to the full-span build, feeding measured Cl/Cd back into the actuation control law.','Mass and energy budgets tracked at each iteration to verify that aerodynamic gain still exceeds actuation overhead.'],
+    contribution:['Defined the optimisation function as net energy per cruise kilometre, not peak L/D — this single decision sets a different optimal geometry to the textbook one and reframes every downstream trade-off.','Selected a compliant-mechanism structure over a hinged-segment morphing concept; hinged designs were rejected for mass penalty, hinge friction, and surface-step drag that would have eroded the aerodynamic gain.','Designed the CFD test matrix to include transitional camber states explicitly, after early XFOIL results showed the intermediate geometries had non-monotonic drag behaviour.','Integrated the project as the validation case for the in-house wind tunnel — closing analysis, fabrication, and test inside a single project ecosystem.'],
+    optimisation:'The wing is treated as a coupled system: actuator mass, servo response time, and skin compliance are traded against aerodynamic gain at the mission level, not the airfoil level. Optimising for net energy per cruise kilometre — rather than peak L/D — leads to a softer morphing range with lower actuation duty cycle, which preserves the energy budget the morphing was meant to win in the first place.',
+    failure_mode:'Most likely failure: skin buckling or local wrinkling at the leading edge under camber-down actuation, triggering early separation and collapsing the aerodynamic gain the morphing is meant to deliver. Mitigation: graded skin stiffness, leading-edge reinforcement, and tunnel verification of attached flow across the full morph cycle before flight test.',
+    uncertainty:'Dominant unknown is the dynamic aerodynamic response during the morph transition itself. Static endpoint polars are well-characterised by XFOIL and CFD; the unsteady drag and pitching-moment behaviour during a 0.5–1.0 s camber change is not — and it determines whether the actuation overhead is recovered or wasted.',
+    tradeoff:'Peak performance is bounded by actuator authority versus structural compliance. A more compliant skin gives a wider morph range but reduces aeroelastic stiffness, raising flutter risk. A stiffer skin is safer but narrows the usable camber range and erodes the gain over a fixed wing. The build operates inside this band — wider is not better.',
+    result:'In active development. The wing is the integration point for every system above: fluid-dynamics analysis sets the morphing envelope, parametric CAD generates the compliant structure, and the in-house wind tunnel provides the validation loop. Sub-scale section build is the current milestone.',
+    tags:['Morphing wing','Compliant mechanism','CFD + XFOIL','Systems integration','Capstone'] },
+];
+ 
+// ─── RENDER SYSTEMS ───
+const sysGrid = document.getElementById('sys-grid');
+sysGrid.innerHTML = systems.map((s,i)=>`
+  <article class="sys-panel reveal" style="transition-delay:${i*80}ms">
+    <header class="sys-panel__head">
+      <div class="sys-panel__id"><span class="mono sys-panel__sysid">${s.id}</span><span class="pulse-dot"></span></div>
+      <span class="sys-panel__code mono">${s.code}</span>
+    </header>
+    <h3 class="sys-panel__name">${s.name}</h3>
+    <p class="sys-panel__summary">${s.summary}</p>
+    <div class="sys-panel__section">
+      <span class="label">Methods</span>
+      <ul class="sys-panel__methods">${s.methods.map(m=>`<li><span class="sys-panel__tick"></span><span>${m}</span></li>`).join('')}</ul>
+    </div>
+    <div class="sys-panel__section">
+      <span class="label">Enables</span>
+      <p class="sys-panel__enables">${s.enables}</p>
+    </div>
+    <div class="sys-panel__metrics">${s.metrics.map(m=>`<div class="sys-metric"><span class="sys-metric__k mono">${m.k}</span><span class="sys-metric__v mono">${m.v}</span></div>`).join('')}</div>
+  </article>`).join('');
+ 
+// ─── RENDER PROJECTS ───
+const prjList = document.getElementById('prj-list');
+const openSet = new Set(['PRJ-05']);
+ 
+function renderProjects() {
+  prjList.innerHTML = projects.map((p,i)=>{
+    const isOpen = openSet.has(p.id);
+    return `
+      <li class="prj-card reveal in${p.featured?' prj-card--featured':''}${isOpen?' is-open':''}" style="transition-delay:${Math.min(i*60,240)}ms">
+        <button class="prj-card__summary" data-id="${p.id}" aria-expanded="${isOpen}">
+          <div class="prj-card__col-id">
+            <span class="prj-card__num mono">${String(i+1).padStart(2,'0')}</span>
+            <span class="prj-card__code mono">${p.code}</span>
+            ${p.featured?'<span class="prj-card__featured-tag mono">CAPSTONE</span>':''}
+          </div>
+          <div class="prj-card__col-main">
+            <h3 class="prj-card__title">${p.title}</h3>
+            <p class="prj-card__subtitle">${p.subtitle}</p>
+          </div>
+          <div class="prj-card__col-meta">
+            <span class="prj-card__meta-item mono">${p.domain}</span>
+            <span class="prj-card__meta-sep"></span>
+            <span class="prj-card__meta-item mono">${p.year}</span>
+            <span class="prj-card__meta-sep"></span>
+            <span class="prj-card__meta-item prj-card__status mono">${p.status}</span>
+          </div>
+          <div class="prj-card__col-toggle">
+            <svg width="14" height="14" viewBox="0 0 14 14" style="transform:${isOpen?'rotate(180deg)':'rotate(0)'};transition:transform 320ms cubic-bezier(0.16,1,0.3,1)"><path d="M3 5L7 9L11 5" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="square"/></svg>
+          </div>
+        </button>
+        ${isOpen?`
+        <div class="prj-card__detail">
+          <div class="prj-card__detail-inner">
+            <div class="detail-block"><div class="detail-block__label-row"><span class="label">Problem</span><span class="detail-block__rule"></span></div><p class="detail-block__body">${p.problem}</p></div>
+            <div class="detail-block"><div class="detail-block__label-row"><span class="label">Methodology</span><span class="detail-block__rule"></span></div><ol class="detail-block__list">${p.methodology.map((m,j)=>`<li><span class="detail-block__index mono">${String(j+1).padStart(2,'0')}</span><span>${m}</span></li>`).join('')}</ol></div>
+            ${p.contribution?`<div class="detail-block"><div class="detail-block__label-row"><span class="label">Contribution</span><span class="detail-block__rule"></span></div><ol class="detail-block__list">${p.contribution.map((m,j)=>`<li><span class="detail-block__index mono">${String(j+1).padStart(2,'0')}</span><span>${m}</span></li>`).join('')}</ol></div>`:''}
+            <div class="detail-block detail-block--accent"><div class="detail-block__label-row"><span class="label">Optimisation</span><span class="detail-block__rule"></span></div><p class="detail-block__body">${p.optimisation}</p></div>
+            ${p.featured&&p.failure_mode?`<div class="detail-block"><div class="detail-block__label-row"><span class="label">Primary failure mode</span><span class="detail-block__rule"></span></div><p class="detail-block__body">${p.failure_mode}</p></div>`:''}
+            ${p.featured&&p.uncertainty?`<div class="detail-block"><div class="detail-block__label-row"><span class="label">Key uncertainty</span><span class="detail-block__rule"></span></div><p class="detail-block__body">${p.uncertainty}</p></div>`:''}
+            ${p.featured&&p.tradeoff?`<div class="detail-block"><div class="detail-block__label-row"><span class="label">Limiting trade-off</span><span class="detail-block__rule"></span></div><p class="detail-block__body">${p.tradeoff}</p></div>`:''}
+            <div class="detail-block"><div class="detail-block__label-row"><span class="label">Result</span><span class="detail-block__rule"></span></div><p class="detail-block__body">${p.result}</p></div>
+            <div class="prj-card__tags">${p.tags.map(t=>`<span class="prj-tag mono">${t}</span>`).join('')}</div>
+          </div>
+        </div>`:''}
+      </li>`;
+  }).join('');
+ 
+  prjList.querySelectorAll('.prj-card__summary').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const id = btn.dataset.id;
+      if(openSet.has(id)) openSet.delete(id); else openSet.add(id);
+      renderProjects();
+    });
+  });
+}
+renderProjects();
+ 
+// ─── REVEAL ───
+const io = new IntersectionObserver((entries)=>{
+  for(const e of entries){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } }
+},{threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+ 
+// ─── AIRFLOW FIELD ───
+const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+if(!reduced) initAirflow();
+ 
+function initAirflow(){
+  const container = document.getElementById('fx-canvas');
+  const PERM = new Uint8Array(512);
+  {
+    const p = new Uint8Array(256);
+    for(let i=0;i<256;i++) p[i]=i;
+    let seed = 1337;
+    const rng = ()=>{ seed=(seed*16807)%2147483647; return seed/2147483647; };
+    for(let i=255;i>0;i--){ const j=Math.floor(rng()*(i+1)); [p[i],p[j]]=[p[j],p[i]]; }
+    for(let i=0;i<512;i++) PERM[i]=p[i&255];
+  }
+  const fade=t=>t*t*t*(t*(t*6-15)+10);
+  const lerp=(a,b,t)=>a+t*(b-a);
+  const grad=(h,x,y,z)=>{ h=h&15; const u=h<8?x:y; const v=h<4?y:(h===12||h===14?x:z); return ((h&1)===0?u:-u)+((h&2)===0?v:-v); };
+  function noise3(x,y,z){
+    const X=Math.floor(x)&255, Y=Math.floor(y)&255, Z=Math.floor(z)&255;
+    x-=Math.floor(x); y-=Math.floor(y); z-=Math.floor(z);
+    const u=fade(x), v=fade(y), w=fade(z);
+    const A=PERM[X]+Y, AA=PERM[A]+Z, AB=PERM[A+1]+Z;
+    const B=PERM[X+1]+Y, BA=PERM[B]+Z, BB=PERM[B+1]+Z;
+    return lerp(lerp(lerp(grad(PERM[AA],x,y,z),grad(PERM[BA],x-1,y,z),u),lerp(grad(PERM[AB],x,y-1,z),grad(PERM[BB],x-1,y-1,z),u),v),
+                lerp(lerp(grad(PERM[AA+1],x,y,z-1),grad(PERM[BA+1],x-1,y,z-1),u),lerp(grad(PERM[AB+1],x,y-1,z-1),grad(PERM[BB+1],x-1,y-1,z-1),u),v),w);
+  }
+  const EPS=0.08, _curl={x:0,y:0};
+  function curl2D(x,y,z){
+    _curl.x=(noise3(x,y+EPS,z)-noise3(x,y-EPS,z))/(2*EPS);
+    _curl.y=-(noise3(x+EPS,y,z)-noise3(x-EPS,y,z))/(2*EPS);
+  }
+  const w=container.clientWidth||window.innerWidth, h=container.clientHeight||window.innerHeight;
+  const dpr=Math.min(window.devicePixelRatio||1, 1.5);
+  const ua=navigator.userAgent.toLowerCase();
+  const isMobile=/mobi|android|iphone|ipad/.test(ua);
+  const cores=navigator.hardwareConcurrency||4;
+  const N = (isMobile||cores<=4) ? 700 : 1800;
+  let renderer;
+  try {
+    renderer = new THREE.WebGLRenderer({antialias:false,alpha:true,powerPreference:'high-performance'});
+  } catch(e){ console.warn('WebGL unavailable'); return; }
+  renderer.setPixelRatio(dpr);
+  renderer.setSize(w,h,false);
+  renderer.setClearColor(0x000000,0);
+  renderer.domElement.style.display='block';
+  container.appendChild(renderer.domElement);
+  const scene=new THREE.Scene();
+  const viewH=10; let aspect=w/h;
+  const camera=new THREE.OrthographicCamera(-viewH*aspect, viewH*aspect, viewH, -viewH, 0.1, 100);
+  camera.position.z=10;
+  const positions=new Float32Array(N*2);
+  const lifetimes=new Float32Array(N);
+  const maxLife=new Float32Array(N);
+  const segPos=new Float32Array(N*2*3);
+  const segCol=new Float32Array(N*2*3);
+  let bx=camera.right*1.1, by=camera.top*1.1;
+  for(let i=0;i<N;i++){
+    positions[i*2]=(Math.random()*2-1)*bx; positions[i*2+1]=(Math.random()*2-1)*by;
+    maxLife[i]=2+Math.random()*3.5; lifetimes[i]=Math.random()*maxLife[i];
+  }
+  const geo=new THREE.BufferGeometry();
+  geo.setAttribute('position',new THREE.BufferAttribute(segPos,3));
+  geo.setAttribute('color',new THREE.BufferAttribute(segCol,3));
+  const mat=new THREE.LineBasicMaterial({vertexColors:true,transparent:true,opacity:.55,blending:THREE.AdditiveBlending,depthWrite:false});
+  const lines=new THREE.LineSegments(geo,mat); scene.add(lines);
+  let scrollProgress=0, targetScroll=0, targetSpeed=1, currentSpeed=1, lastTime=performance.now(), visible=true;
+  function onResize(){
+    const w=container.clientWidth||window.innerWidth, h=container.clientHeight||window.innerHeight;
+    aspect=w/h;
+    camera.left=-viewH*aspect; camera.right=viewH*aspect; camera.top=viewH; camera.bottom=-viewH;
+    camera.updateProjectionMatrix();
+    renderer.setSize(w,h,false);
+    bx=camera.right*1.1; by=camera.top*1.1;
+  }
+  function onScroll(){
+    const doc=document.documentElement;
+    const max=doc.scrollHeight-window.innerHeight;
+    targetScroll=max>0?Math.min(1,Math.max(0,window.scrollY/max)):0;
+    targetSpeed=1+targetScroll*0.45;
+  }
+  window.addEventListener('resize',onResize,{passive:true});
+  window.addEventListener('scroll',onScroll,{passive:true});
+  document.addEventListener('visibilitychange',()=>{ visible=!document.hidden; if(visible){lastTime=performance.now(); requestAnimationFrame(tick);} });
+  const VR=0.34,VG=0.28,VB=0.62, CR=0.22,CG=0.50,CB=0.62;
+  function tick(now){
+    if(!visible) return;
+    const dt=Math.min(.05,(now-lastTime)/1000); lastTime=now;
+    scrollProgress += (targetScroll-scrollProgress)*0.05;
+    currentSpeed += (targetSpeed-currentSpeed)*0.08;
+    const swirlFreq = 0.18 + scrollProgress*0.06;
+    const t = now*0.001*0.08;
+    const driftX=.55*currentSpeed, driftY=-0.05*currentSpeed;
+    for(let i=0;i<N;i++){
+      const i2=i*2, i6=i*6;
+      let x=positions[i2], y=positions[i2+1];
+      segPos[i6]=x; segPos[i6+1]=y; segPos[i6+2]=0;
+      curl2D(x*swirlFreq, y*swirlFreq, t);
+      x += (_curl.x*1.6 + driftX)*dt;
+      y += (_curl.y*1.6 + driftY)*dt;
+      lifetimes[i]+=dt;
+      if(x>bx||x<-bx||y>by||y<-by||lifetimes[i]>maxLife[i]){
+        if(Math.random()<0.7){ x=-bx+Math.random()*0.5; y=(Math.random()*2-1)*by*0.95; }
+        else { x=(Math.random()*2-1)*bx; y=(Math.random()*2-1)*by; }
+        lifetimes[i]=0; segPos[i6]=x; segPos[i6+1]=y;
+      }
+      positions[i2]=x; positions[i2+1]=y;
+      segPos[i6+3]=x; segPos[i6+4]=y; segPos[i6+5]=0;
+      const band=(y/by)*0.5+0.5;
+      const lf=lifetimes[i]/maxLife[i];
+      const env=Math.sin(lf*Math.PI);
+      const r=(VR*(1-band)+CR*band)*env, g=(VG*(1-band)+CG*band)*env, b=(VB*(1-band)+CB*band)*env;
+      segCol[i6]=r*0.35; segCol[i6+1]=g*0.35; segCol[i6+2]=b*0.35;
+      segCol[i6+3]=r; segCol[i6+4]=g; segCol[i6+5]=b;
+    }
+    geo.attributes.position.needsUpdate=true; geo.attributes.color.needsUpdate=true;
+    renderer.render(scene,camera);
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+</script>
+</body>
+</html>
