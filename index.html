@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>P.K.M. — Aerodynamic Engineering </title>
+<title>P.K.M. — Pranit Malhotra </title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
@@ -305,62 +305,242 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.166.1/build/three.m
  
 // ─── DATA ───
 const systems = [
-  { id:'SYS-01', code:'FLD', name:'Fluid Dynamics — analytical layer',
-    summary:'Primary decision-making system. Resolves the flow field around a geometry before metal is cut — identifying separation onset, wake structure, and pressure distribution so that design choices are made against simulated evidence, not intuition. All downstream geometry and test plans are anchored here.',
-    methods:['RANS CFD with k-ω SST closure (OpenFOAM, simpleFoam)','Boundary-layer resolution and separation-point tracking','Surface Cp mapping; drag / lift decomposition by component','Wake-width and turbulence-intensity readout for follow-on test design'],
-    enables:'Geometry decisions made against pressure and velocity fields — not assumption. Each design variable is ranked by its contribution to the measured aerodynamic quantity it targets.',
-    metrics:[{k:'Reynolds range',v:'10⁴ – 10⁶'},{k:'Solver class',v:'RANS / LES'}] },
-  { id:'SYS-02', code:'CAD', name:'CAD — execution layer',
-    summary:'Translates analytical decisions into manufacturable geometry. Parametric so that any variable flagged by the fluid-dynamics layer — fillet radius, taper angle, camber distribution — can be re-swept and re-simulated without rebuilding from scratch.',
-    methods:['Parametric solid modelling (Fusion 360, SolidWorks)','G2 / G3 surface continuity on aero-critical faces','Design-for-manufacture constraints driven by available process (CNC, FDM, hand-finish)','Variable tables coupled to simulation inputs — closed iteration loop'],
-    enables:'Geometry that survives a constraint change. New simulation result or fabrication limit propagates through the model in minutes, not days.',
-    metrics:[{k:'Iteration cycle',v:'< 30 min'},{k:'Param coupling',v:'full chain'}] },
-  { id:'SYS-03', code:'EXP', name:'Experimental — validation layer',
-    summary:'The truth check. Physical measurement that either confirms the analytical prediction or quantifies the deviation — and feeds that deviation back as a correction factor on the next CFD cycle. No design is considered closed until simulation and measurement agree within a stated tolerance.',
-    methods:['Open-circuit wind tunnel — in-house build, characterised against pitot reference','Pitot rake and pressure-tap arrays for velocity and Cp profiles','Flow visualisation (tuft, smoke) for separation and reattachment','Sim-vs-test deviation analysis with stated uncertainty bounds'],
-    enables:'Confidence that simulated gains survive contact with real flow — and, when they do not, a calibration path that improves the next CFD run rather than discarding it.',
-    metrics:[{k:'Test velocity',v:'0 – 25 m/s'},{k:'Sample rate',v:'≤ 1 kHz'}] },
+  { 
+  id:'SYS-01',
+  code:'FLD',
+  name:'Fluid Dynamics — analytical layer',
+
+  summary:'This is where I make the main aerodynamic decisions. Before any geometry is manufactured, I simulate the flow around the design to understand separation behaviour, wake structure, and pressure distribution. That means design choices are driven by evidence from the flow field rather than intuition alone.',
+
+  methods:[
+    'RANS CFD using k-ω SST turbulence modelling (OpenFOAM, simpleFoam)',
+    'Boundary-layer analysis and separation-point tracking',
+    'Surface Cp mapping with drag and lift breakdown by component',
+    'Wake-width and turbulence-intensity analysis to support physical testing'
+  ],
+
+  enables:'I can directly link each geometry change to a measurable aerodynamic effect, allowing me to prioritise the variables that have the greatest impact on performance.',
+
+  metrics:[
+    {k:'Reynolds range',v:'10⁴ – 10⁶'},
+    {k:'Solver class',v:'RANS / LES'}
+  ]
+},
+
+{ 
+  id:'SYS-02',
+  code:'CAD',
+  name:'CAD — execution layer',
+
+  summary:'This is where I turn aerodynamic decisions into manufacturable geometry. The models are fully parametric, so when CFD highlights a change — whether that is a taper angle, fillet radius, or camber profile — I can quickly adjust and re-test the design without rebuilding everything from scratch.',
+
+  methods:[
+    'Parametric solid modelling (Fusion 360, SolidWorks)',
+    'G2 / G3 surface continuity across aero-critical regions',
+    'Design-for-manufacture constraints based on CNC, FDM, and hand-finishing methods',
+    'Simulation-linked variable tables for rapid iteration'
+  ],
+
+  enables:'I can adapt the geometry quickly when simulation results or manufacturing constraints change, which keeps the development cycle efficient and flexible.',
+
+  metrics:[
+    {k:'Iteration cycle',v:'< 30 min'},
+    {k:'Param coupling',v:'full chain'}
+  ]
+},
+
+{ 
+  id:'SYS-03',
+  code:'EXP',
+  name:'Experimental — validation layer',
+
+  summary:'This is the stage where I validate simulation against real-world testing. I use experimental measurements to confirm CFD predictions, identify any deviations, and improve the accuracy of future simulations through calibrated feedback.',
+
+  methods:[
+    'In-house open-circuit wind tunnel characterised against pitot reference measurements',
+    'Pitot rake and pressure-tap arrays for velocity and Cp profiling',
+    'Flow visualisation using tuft and smoke testing for separation analysis',
+    'Simulation-versus-test correlation with uncertainty quantification'
+  ],
+
+  enables:'I can verify that aerodynamic improvements seen in simulation still perform under real flow conditions, while also using any discrepancies to refine the next CFD cycle.',
+
+  metrics:[
+    {k:'Test velocity',v:'0 – 25 m/s'},
+    {k:'Sample rate',v:'≤ 1 kHz'}
+  ]
+}
 ];
  
 const projects = [
-  { id:'PRJ-01', code:'F1S', title:'F1 in Schools', subtitle:'3rd Place — National Finals', domain:'Aerodynamic Optimisation', year:'2024', status:'Completed',
-    problem:'Design a CO₂-propelled scale car for minimum drag under a fixed body-volume envelope and fixed-mass tolerance, against a national field of regional-champion teams operating with significantly larger fabrication budgets.',
-    methodology:['Baseline body modelled in Fusion 360 with three parametric drivers: body width, nose radius, rear taper angle.','CFD sweep of baseline plus four candidate shells in OpenFOAM (simpleFoam, k-ω SST) at race-condition velocity.','Surface Cp mapping to locate separation on the rear deck and inboard wheel fairings.','Iterative geometry refinement targeting attached flow across the rear 80% of body length.','Final candidate machined and run on the regulation track for time-of-flight validation against CFD prediction.'],
-    contribution:['Owned the CFD pipeline end to end — mesh, boundary conditions, post-processing — and cross-checked results against a coarser second mesh to bound numerical error.','Identified the wheel-fairing fillet radius as the dominant drag driver after the first sweep; redirected subsequent iterations onto that variable rather than splitting effort across the full parameter set.','Rejected an aggressive low-drag nose profile because Cp data showed early stagnation movement and unstable attachment at off-axis yaw — chose a slightly higher-drag nose with stable attachment instead.','Tuned nose taper against wake width, not Cd in isolation, so the car held trailing-position pace as well as straight-line speed.'],
-    optimisation:'Drag was prioritised over downforce because the brief rewards top-end velocity, not cornering grip. The wheel-fairing fillet radius alone accounted for ~38% of the Cd delta seen across iterations — every subsequent design hour was spent there, not on lower-leverage variables. Nose taper was tuned to a wake-width target rather than to minimum Cd, accepting a small Cd penalty for measurably more stable trailing-car behaviour.',
-    result:'3rd place at National Finals against 30+ regional-champion teams. Final race pace within 1.4% of the winning car despite sub-quartile fabrication budget. Measured time-of-flight tracked CFD prediction to within 3%.',
-    tags:['CFD','OpenFOAM','Fusion 360','Iterative design'] },
-  { id:'PRJ-02', code:'ARK', title:'Arkwright Engineering Scholarship', subtitle:'Selective National Recognition', domain:'Engineering Aptitude', year:'2023', status:'Awarded',
-    problem:'Two-stage selection — timed aptitude examination plus a panel interview defending an original engineering proposal — assessing analytical reasoning, design judgement, and the ability to hold a position under technical scrutiny.',
-    methodology:['Proposal: a low-cost airflow visualisation rig for school-level aerodynamics teaching.','Comparative analysis of three visualisation methods — smoke, tuft, laser sheet — scored against cost, repeatability, and safety for unsupervised student use.','Defended the position that measurement uncertainty is the more useful quantity to teach at learner stage, not measurement precision.'],
-    contribution:['Authored the proposal from scratch — chose teaching-instrument framing over research-instrument framing, which reframed the panel’s evaluation criteria entirely.','Pre-built the cost-benefit comparison matrix so trade-offs could be defended numerically rather than argued from intuition.','Rejected laser-sheet visualisation despite higher fidelity — safety constraints and operator training requirements made it unviable for the stated end-user.','Identified ahead of the interview that the load-bearing argument was the framing of trade-offs, not the rig itself; prepared accordingly.'],
-    optimisation:'The rig was pitched as teaching-first, research-second — accepting reduced fidelity to gain unsupervised student operability. This single framing choice converted a moderate proposal into a defensible one: the panel evaluated against pedagogical fit, where the lower-cost design wins, rather than against measurement fidelity, where it would have lost.',
-    result:'Scholarship awarded. Sustained engineering mentorship, technical sponsorship, and entry into the national engineering pipeline.',
-    tags:['Interview defence','Design rationale','Engineering reasoning'] },
-  { id:'PRJ-03', code:'BIO', title:'Ionic Wind × Shark Skin Biomimicry', subtitle:'Research Paper — Bio-inspired Fluid Dynamics', domain:'Independent Research', year:'2024', status:'Published — internal',
-    problem:'Electrohydrodynamic (EHD) thrusters suffer from low thrust-to-area ratios and unstable corona discharge at upper voltage. Open question: does denticle-aligned surface microstructure — analogous to shark-skin riblets — suppress turbulent breakdown in the post-corona region and raise effective thrust per unit electrode area?',
-    methodology:['Literature synthesis across EHD propulsion (Christenson & Moller; MIT EAD aircraft, Barrett et al.) and riblet drag reduction (Bechert et al., Walsh).','Working hypothesis: riblets aligned with ion drift suppress lateral turbulent fluctuation in the ion-laden boundary layer, stabilising thrust.','Benchtop test cell built with swappable electrode plates — smooth aluminium control vs. 3D-printed denticle array with riblet pitch as primary variable.','Measurement chain: micro-balance for thrust, series ammeter for current draw, high-speed imaging for corona stability across an applied-voltage sweep.'],
-    contribution:['Designed and built the test cell — electrode mount, alignment jig, micro-balance integration — from scratch.','Made the central methodological decision to normalise riblet pitch against estimated ion mean free path rather than against biological denticle scale. This reframed the project from biomimicry-by-analogy to length-scale matching.','Iterated electrode-gap geometry three times after early runs showed corona instability dominating the thrust signal; locked geometry once corona stability was repeatable across runs.','Rejected an early plan to vary riblet height as a second axis — single-variable sweep gave cleaner causation and the rig’s measurement uncertainty would have masked the second-order effect anyway.'],
-    optimisation:'Riblet pitch was treated as the single primary variable, normalised against ion mean free path rather than copied from biological scale. That reframing — from "copy nature" to "match the relevant physical length scale" — is the methodological core of the paper: it explains why direct biomimicry was failing in earlier amateur literature and predicts a different optimal pitch.',
-    result:'Measurable improvement in thrust stability at the upper end of the voltage sweep, where the smooth-plate control became unstable. Paper documents the rig, the deviation between predicted and measured scaling, and a refined experiment plan for a follow-on study with tighter pitch resolution.',
-    tags:['EHD propulsion','Biomimicry','Experimental rig','Literature synthesis'] },
-  { id:'PRJ-04', code:'WT', title:'Wind Tunnel Development', subtitle:'In-House Validation Instrument', domain:'Instrumentation Design', year:'2024 – 2025', status:'In development',
-    problem:'No accessible school-grade subsonic wind tunnel available for validating CFD work produced by the other projects. Commercial units are cost-prohibitive; existing DIY designs typically run at turbulence intensities (5–8%) too high to discriminate between competing aerodynamic geometries.',
-    methodology:['Open-circuit Eiffel-type configuration selected over closed-circuit for footprint, cost, and ease of test-section access.','Contraction ratio set at 6:1 — chosen from the turbulence-intensity-vs-contraction-length trade curves in Mehta & Bradshaw (1979).','Conditioning train: hexagonal-cell honeycomb followed by three graded mesh screens, targeting < 1% turbulence intensity at test-section inlet.','Instrumentation: pitot rake at test-section inlet for velocity profile, surface pressure taps for Cp distribution on mounted models.','Plenum chamber and contraction surfaces built with internal hand-finishing to suppress surface-roughness-induced transition.'],
-    contribution:['Specified the entire instrument against a measurement-quality target (< 1% TI) rather than a velocity target — the more useful specification for CFD validation, but the harder one to hit.','Designed the contraction profile in CAD using a matched-cubic curve to keep favourable pressure gradient through the contraction and prevent boundary-layer growth on the walls.','Rejected a stepped honeycomb-only conditioning section in favour of honeycomb-plus-screens; honeycomb alone removes swirl but leaves small-scale turbulence intact.','Built the frame and contraction; screens, pitot rake, and DAQ chain are the current work front.'],
-    optimisation:'The design is driven by measurement quality, not peak velocity. A slower, cleaner flow is more useful for resolving small aerodynamic differences than a fast, noisy one. The contraction was the longest-considered decision in the build — its geometry sets the ceiling on every measurement the tunnel will ever take, and a poor contraction cannot be recovered downstream.',
-    result:'Frame and contraction complete. Honeycomb fitted; screens, instrumentation, and DAQ in active build. Target operating envelope: models up to 200 mm chord at 0–25 m/s, with characterised TI to be reported alongside first test runs.',
-    tags:['Wind tunnel','Instrumentation','Turbulence management','Open-circuit'] },
-  { id:'PRJ-05', code:'MW', title:'Morphing Wing RC Aircraft', subtitle:'Capstone — Adaptive Aerodynamics', domain:'Adaptive Systems', year:'2025 – 2026', status:'Concept → Prototype', featured:true,
-    problem:'A fixed-geometry wing is always a compromise: a profile optimised for cruise carries an efficiency penalty in climb and approach. The capstone tests whether a small RC platform can carry a compliant, span-wise morphing wing whose camber adapts in flight, and whether the actuation overhead — mass, power, response delay — is recovered through aerodynamic gain across a representative mission profile.',
-    methodology:['Wing structure: corrugated internal skeleton with elastomeric skin — bending compliance in the camber axis, stiffness in span — driven by a single servo per span station, replacing discrete control surfaces.','XFOIL polar sweep across a target camber range to define the morphing envelope at the mission Reynolds number.','CFD on transitional geometries — intermediate camber states — not only on the endpoint shapes, because the penalty during the morph itself is the failure mode that gets overlooked.','Sub-scale section testing in the in-house wind tunnel before committing to the full-span build, feeding measured Cl/Cd back into the actuation control law.','Mass and energy budgets tracked at each iteration to verify that aerodynamic gain still exceeds actuation overhead.'],
-    contribution:['Defined the optimisation function as net energy per cruise kilometre, not peak L/D — this single decision sets a different optimal geometry to the textbook one and reframes every downstream trade-off.','Selected a compliant-mechanism structure over a hinged-segment morphing concept; hinged designs were rejected for mass penalty, hinge friction, and surface-step drag that would have eroded the aerodynamic gain.','Designed the CFD test matrix to include transitional camber states explicitly, after early XFOIL results showed the intermediate geometries had non-monotonic drag behaviour.','Integrated the project as the validation case for the in-house wind tunnel — closing analysis, fabrication, and test inside a single project ecosystem.'],
-    optimisation:'The wing is treated as a coupled system: actuator mass, servo response time, and skin compliance are traded against aerodynamic gain at the mission level, not the airfoil level. Optimising for net energy per cruise kilometre — rather than peak L/D — leads to a softer morphing range with lower actuation duty cycle, which preserves the energy budget the morphing was meant to win in the first place.',
-    failure_mode:'Most likely failure: skin buckling or local wrinkling at the leading edge under camber-down actuation, triggering early separation and collapsing the aerodynamic gain the morphing is meant to deliver. Mitigation: graded skin stiffness, leading-edge reinforcement, and tunnel verification of attached flow across the full morph cycle before flight test.',
-    uncertainty:'Dominant unknown is the dynamic aerodynamic response during the morph transition itself. Static endpoint polars are well-characterised by XFOIL and CFD; the unsteady drag and pitching-moment behaviour during a 0.5–1.0 s camber change is not — and it determines whether the actuation overhead is recovered or wasted.',
-    tradeoff:'Peak performance is bounded by actuator authority versus structural compliance. A more compliant skin gives a wider morph range but reduces aeroelastic stiffness, raising flutter risk. A stiffer skin is safer but narrows the usable camber range and erodes the gain over a fixed wing. The build operates inside this band — wider is not better.',
-    result:'In active development. The wing is the integration point for every system above: fluid-dynamics analysis sets the morphing envelope, parametric CAD generates the compliant structure, and the in-house wind tunnel provides the validation loop. Sub-scale section build is the current milestone.',
-    tags:['Morphing wing','Compliant mechanism','CFD + XFOIL','Systems integration','Capstone'] },
+{ 
+  id:'PRJ-01',
+  code:'F1S',
+  title:'F1 in Schools',
+  subtitle:'3rd Place — National Finals',
+  domain:'Aerodynamic Optimisation',
+  year:'2024',
+  status:'Completed',
+
+  problem:'The challenge was to design a CO₂-powered scale car with the lowest possible drag while staying inside strict body-volume and mass constraints. The competition field included regional-champion teams, many with significantly larger fabrication budgets and access to higher-end manufacturing.',
+
+  methodology:[
+    'I built the baseline car in Fusion 360 around three main parametric variables: body width, nose radius, and rear taper angle.',
+    'I ran CFD sweeps in OpenFOAM (simpleFoam, k-ω SST) across the baseline and four alternative body concepts at race-condition velocity.',
+    'Surface Cp mapping was used to identify separation regions around the rear deck and wheel fairings.',
+    'The geometry was iteratively refined to keep flow attached across as much of the rear body as possible.',
+    'The final car was manufactured and validated on the regulation track against the CFD predictions.'
+  ],
+
+  contribution:[
+    'I managed the CFD pipeline end-to-end, including meshing, boundary conditions, and post-processing, while also checking results against a second coarser mesh to estimate numerical error.',
+    'Early testing showed that the wheel-fairing fillet radius had a much larger effect on drag than expected, so I focused later iterations heavily on that variable instead of spreading effort too widely.',
+    'I rejected an aggressive low-drag nose concept after Cp analysis showed unstable attachment behaviour under off-axis yaw conditions.',
+    'I tuned the nose taper around wake behaviour rather than Cd alone, helping the car maintain stronger trailing performance as well as straight-line pace.'
+  ],
+
+  optimisation:'The project prioritised drag reduction over downforce because the competition rewards top speed rather than cornering grip. After the first CFD sweep, the wheel-fairing fillet radius emerged as the highest-leverage design variable, accounting for roughly 38% of the observed Cd variation between iterations. Most later optimisation work focused there.',
+
+  result:'The car placed 3rd at the National Finals against more than 30 regional-champion teams. Final race pace was within 1.4% of the winning car despite a much smaller fabrication budget, and measured track performance matched CFD predictions to within 3%.',
+
+  tags:['CFD','OpenFOAM','Fusion 360','Iterative design']
+},
+
+{ 
+  id:'PRJ-02',
+  code:'ARK',
+  title:'Arkwright Engineering Scholarship',
+  subtitle:'Selective National Recognition',
+  domain:'Engineering Aptitude',
+  year:'2023',
+  status:'Awarded',
+
+  problem:'The scholarship process involved both a timed aptitude examination and a technical interview centred around defending an original engineering proposal. The assessment focused heavily on analytical reasoning, technical judgement, and the ability to justify trade-offs under scrutiny.',
+
+  methodology:[
+    'I proposed a low-cost airflow visualisation rig designed for school-level aerodynamics teaching.',
+    'I compared smoke, tuft, and laser-sheet visualisation methods against cost, repeatability, and operational safety.',
+    'I argued that understanding measurement uncertainty is more educationally valuable at learner level than pursuing maximum precision.'
+  ],
+
+  contribution:[
+    'I developed the proposal independently and intentionally framed it as a teaching instrument rather than a research instrument.',
+    'I prepared a numerical trade-off matrix beforehand so design choices could be defended quantitatively during the interview.',
+    'I rejected laser-sheet visualisation despite its higher fidelity because the safety and operator-training requirements did not fit the intended users.',
+    'Before the interview, I recognised that the key challenge would be defending the reasoning behind the trade-offs rather than the rig itself, so I prepared around that.'
+  ],
+
+  optimisation:'The project was deliberately positioned as teaching-first and research-second. Accepting lower fidelity in exchange for accessibility and safe student operation made the proposal significantly more defensible within the context of education.',
+
+  result:'The scholarship was awarded, leading to continued engineering mentorship, technical sponsorship opportunities, and entry into the wider engineering network.',
+
+  tags:['Interview defence','Design rationale','Engineering reasoning']
+},
+
+{ 
+  id:'PRJ-03',
+  code:'BIO',
+  title:'Ionic Wind × Shark Skin Biomimicry',
+  subtitle:'Research Paper — Bio-inspired Fluid Dynamics',
+  domain:'Independent Research',
+  year:'2024',
+  status:'Published — internal',
+
+  problem:'Electrohydrodynamic thrusters often suffer from unstable corona discharge and low thrust efficiency at higher voltages. I explored whether riblet-like surface structures inspired by shark skin could stabilise the ion-laden boundary layer and improve thrust behaviour.',
+
+  methodology:[
+    'I reviewed literature across both EHD propulsion and riblet drag-reduction research.',
+    'The working hypothesis was that riblets aligned with ion drift could suppress lateral turbulent fluctuations and stabilise thrust generation.',
+    'I designed and built a benchtop test rig with interchangeable smooth and riblet-textured electrode plates.',
+    'The measurement setup included thrust measurement using a micro-balance, current monitoring, and high-speed imaging for corona stability analysis.'
+  ],
+
+  contribution:[
+    'I designed and assembled the full experimental setup, including the electrode mounts, alignment system, and measurement integration.',
+    'One of the main methodological decisions was to normalise riblet pitch against estimated ion mean free path rather than directly copying biological denticle scale.',
+    'After early tests showed unstable corona behaviour dominating the data, I redesigned the electrode-gap geometry several times before locking the final configuration.',
+    'I intentionally limited the experiment to a single-variable sweep to improve causation clarity and avoid burying effects inside measurement uncertainty.'
+  ],
+
+  optimisation:'The project focused on matching the relevant physical length scale rather than directly copying biological geometry. That shift in approach became the central argument of the paper and helped explain why simpler biomimicry approaches often fail.',
+
+  result:'The riblet-textured surfaces showed measurable improvements in thrust stability at higher voltages where the smooth control surfaces became unstable. The paper also documented the gap between predicted and measured scaling behaviour and proposed improvements for future studies.',
+
+  tags:['EHD propulsion','Biomimicry','Experimental rig','Literature synthesis']
+},
+
+{ 
+  id:'PRJ-04',
+  code:'WT',
+  title:'Wind Tunnel Development',
+  subtitle:'In-House Validation Instrument',
+  domain:'Instrumentation Design',
+  year:'2024 – 2025',
+  status:'In development',
+
+  problem:'I wanted a reliable way to validate CFD work experimentally, but most school-accessible wind tunnels either lacked measurement quality or produced turbulence levels too high for meaningful aerodynamic comparison. Commercial systems were also financially unrealistic.',
+
+  methodology:[
+    'I selected an open-circuit Eiffel-type configuration for lower cost, smaller footprint, and easier test-section access.',
+    'The contraction ratio was chosen using turbulence-intensity trade-off data from published literature.',
+    'The conditioning section combines a honeycomb with multiple mesh screens to target turbulence intensity below 1% at the test section.',
+    'The tunnel includes pitot-rake instrumentation and pressure taps for velocity-profile and Cp measurements.',
+    'Internal surfaces were hand-finished to reduce roughness-induced transition effects.'
+  ],
+
+  contribution:[
+    'I defined the project around a measurement-quality target rather than a peak velocity target, since low turbulence intensity is more valuable for CFD validation.',
+    'I designed the contraction geometry in CAD using a matched-cubic profile to maintain a favourable pressure gradient.',
+    'I rejected a honeycomb-only conditioning section because it would remove swirl but leave too much small-scale turbulence.',
+    'I built the frame and contraction section, while the instrumentation and DAQ systems are currently being integrated.'
+  ],
+
+  optimisation:'The tunnel is designed around flow quality rather than maximum speed. A cleaner flow field provides more useful aerodynamic data than a faster but highly turbulent one. Most of the design effort went into the contraction because it effectively sets the quality ceiling for the entire system.',
+
+  result:'The frame, contraction, and honeycomb sections are complete. Instrumentation and data-acquisition systems are currently under development, with the target operating range set at 0–25 m/s for models up to 200 mm chord.',
+
+  tags:['Wind tunnel','Instrumentation','Turbulence management','Open-circuit']
+},
+
+{ 
+  id:'PRJ-05',
+  code:'MW',
+  title:'Morphing Wing RC Aircraft',
+  subtitle:'Capstone — Adaptive Aerodynamics',
+  domain:'Adaptive Systems',
+  year:'2025 – 2026',
+  status:'Concept → Prototype',
+  featured:true,
+
+  problem:'A fixed wing is always a compromise between different flight conditions. This project explores whether a small RC aircraft can use a compliant morphing wing that adapts camber during flight, while still recovering more aerodynamic benefit than the added actuation system costs in mass and energy.',
+
+  methodology:[
+    'The wing uses a compliant internal structure with an elastomeric skin, allowing controlled camber change without traditional hinged control surfaces.',
+    'I used XFOIL to map the aerodynamic envelope across the target camber range at mission Reynolds numbers.',
+    'CFD analysis includes transitional morph states as well as static endpoint geometries, since the transition itself can introduce aerodynamic penalties.',
+    'Sub-scale wing sections will be validated inside the in-house wind tunnel before full-span flight testing.',
+    'Mass and energy budgets are tracked continuously to ensure the aerodynamic gains still outweigh actuation overhead.'
+  ],
+
+  contribution:[
+    'I defined the optimisation target as net energy per cruise kilometre rather than peak L/D, which changes the preferred design solution significantly.',
+    'I selected a compliant morphing mechanism over a hinged approach because hinged concepts introduced too much mass, friction, and surface-step drag.',
+    'After early XFOIL analysis revealed non-monotonic drag behaviour during morph transitions, I expanded the CFD matrix to explicitly include transitional states.',
+    'The project also acts as the integration point for the wider ecosystem — CFD analysis, CAD workflows, and wind-tunnel validation.'
+  ],
+
+  optimisation:'The aircraft is treated as a coupled aerodynamic and mechanical system rather than just an airfoil problem. Servo mass, structural compliance, actuation energy, and aerodynamic gain are all balanced together at mission level. Optimising for overall energy efficiency leads to a more realistic and practical morphing range than simply chasing maximum aerodynamic performance.',
+
+  failure_mode:'The main technical risk is local skin buckling near the leading edge during camber-down actuation, which could trigger early flow separation and erase the aerodynamic benefit. Current mitigation work focuses on graded skin stiffness and leading-edge reinforcement.',
+
+  uncertainty:'The largest unknown is the unsteady aerodynamic response during the morph itself. Static endpoint performance is relatively predictable, but transient drag and pitching-moment behaviour during a live camber transition remains difficult to model accurately.',
+
+  tradeoff:'The design operates inside a narrow balance between compliance and stiffness. Increasing compliance expands morph range but raises aeroelastic and flutter risk, while increasing stiffness improves stability but reduces aerodynamic adaptability.',
+
+  result:'The project is currently in active development, with sub-scale wing testing as the next milestone. It also serves as the integration platform connecting CFD analysis, parametric CAD, and experimental validation into a single workflow.',
+
+  tags:['Morphing wing','Compliant mechanism','CFD + XFOIL','Systems integration','Capstone']
+}
 ];
  
 // ─── RENDER SYSTEMS ───
